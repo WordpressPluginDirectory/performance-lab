@@ -67,7 +67,7 @@ class Perflab_Server_Timing {
 			return;
 		}
 
-		if ( did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: WordPress action name */
@@ -113,7 +113,7 @@ class Perflab_Server_Timing {
 
 		// If the current user has already been determined, and they lack the necessary access,
 		// do not even attempt to calculate the metric.
-		if ( did_action( 'set_current_user' ) && ! current_user_can( $args['access_cap'] ) ) {
+		if ( 0 !== did_action( 'set_current_user' ) && ! current_user_can( $args['access_cap'] ) ) {
 			return;
 		}
 
@@ -160,7 +160,7 @@ class Perflab_Server_Timing {
 		do_action( 'perflab_server_timing_send_header' );
 
 		$header_value = $this->get_header();
-		if ( ! $header_value ) {
+		if ( '' === $header_value ) {
 			return;
 		}
 
@@ -226,6 +226,25 @@ class Perflab_Server_Timing {
 	}
 
 	/**
+	 * Adds hooks to send the Server-Timing header.
+	 *
+	 * When output buffering is enabled, buffer as early as possible so that any other plugins that also do output
+	 * buffering will be able to register Server-Timing metrics. The first output buffer callback to be registered
+	 * is the last one to be called, so by starting the Server-Timing output buffer as soon as possible we can be
+	 * assured that other plugins' output buffer callbacks will run before the Server-Timing one that sends the
+	 * Server-Timing header.
+	 *
+	 * @since 3.2.0
+	 */
+	public function add_hooks(): void {
+		if ( $this->use_output_buffer() ) {
+			add_action( 'template_redirect', array( $this, 'start_output_buffer' ), PHP_INT_MIN );
+		} else {
+			add_filter( 'template_include', array( $this, 'on_template_include' ), PHP_INT_MAX );
+		}
+	}
+
+	/**
 	 * Hook callback for the 'template_include' filter.
 	 *
 	 * This effectively initializes the class to send the Server-Timing header at the right point.
@@ -238,18 +257,22 @@ class Perflab_Server_Timing {
 	 * @return mixed Unmodified value of $passthrough.
 	 */
 	public function on_template_include( $passthrough = null ) {
-		if ( ! $this->use_output_buffer() ) {
-			$this->send_header();
-			return $passthrough;
-		}
+		$this->send_header();
+		return $passthrough;
+	}
 
+	/**
+	 * Starts output buffering to send the Server-Timing header right before returning the buffer.
+	 *
+	 * @since 3.2.0
+	 */
+	public function start_output_buffer(): void {
 		ob_start(
 			function ( $output ) {
 				$this->send_header();
 				return $output;
 			}
 		);
-		return $passthrough;
 	}
 
 	/**

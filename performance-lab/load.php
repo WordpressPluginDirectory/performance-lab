@@ -3,9 +3,9 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 3.1.0
+ * Version: 3.3.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '3.1.0' );
+define( 'PERFLAB_VERSION', '3.3.1' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -104,7 +104,10 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant'     => 'EMBED_OPTIMIZER_VERSION',
 			'experimental' => true,
 		),
-		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
+		'image-prioritizer'       => array(
+			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
+			'experimental' => true,
+		),
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),
@@ -182,7 +185,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 	$current_dropin_version = apply_filters( 'perflab_object_cache_dropin_version', PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
 
 	// Bail if already placed in the latest version or newer.
-	if ( $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
+	if ( null !== $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
 		return;
 	}
 
@@ -194,7 +197,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		return;
 	}
 
-	if ( $wp_filesystem || WP_Filesystem() ) {
+	if ( $wp_filesystem instanceof WP_Filesystem_Base || true === WP_Filesystem() ) {
 		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
 		/*
@@ -211,7 +214,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
 			// If this constant evaluates to `false`, the existing file is for sure from a third party.
-			if ( ! $current_dropin_version ) {
+			if ( false === $current_dropin_version ) {
 				// Set timeout of 1 day before retrying again (only in case the file already exists).
 				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
 				return;
@@ -268,7 +271,7 @@ function perflab_maybe_remove_object_cache_dropin(): void {
 		return;
 	}
 
-	if ( $wp_filesystem || WP_Filesystem() ) {
+	if ( $wp_filesystem instanceof WP_Filesystem_Base || true === WP_Filesystem() ) {
 		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
 		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 

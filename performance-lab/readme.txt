@@ -1,13 +1,11 @@
 === Performance Lab ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        3.1.0
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, site health, measurement, optimization, diagnostics
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   3.3.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, site health, measurement, optimization, diagnostics
 
 Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
 
@@ -59,6 +57,42 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.3.1 =
+
+**Enhancements**
+
+* Add PHPStan strict rules (except for empty.notAllowed). ([1241](https://github.com/WordPress/performance/pull/1241))
+
+**Bug Fixes**
+
+* Allow null to be passed into perflab_admin_pointer(). ([1393](https://github.com/WordPress/performance/pull/1393))
+
+= 3.3.0 =
+
+**Enhancements**
+
+* Bump minimum WP versions and WP version tested up to. ([1333](https://github.com/WordPress/performance/pull/1333))
+* Improve message for WebP site health test. ([1249](https://github.com/WordPress/performance/pull/1249))
+* Remove 'Requires at least' and 'Requires PHP' from plugin readmes. ([1334](https://github.com/WordPress/performance/pull/1334))
+* Upgrade PHPStan to 1.11.6. ([1325](https://github.com/WordPress/performance/pull/1325))
+
+**Bug Fixes**
+
+* Extend core's Autoloaded Options Site Health test if present (in WP 6.6). ([1298](https://github.com/WordPress/performance/pull/1298))
+* Fix unit tests for multisite. ([1327](https://github.com/WordPress/performance/pull/1327))
+
+= 3.2.0 =
+
+**Enhancements**
+
+* Add install note after each PerfLab feature plugin in the plugin list table. ([1265](https://github.com/WordPress/performance/pull/1265))
+* Update plugins with new banners and icons. ([1272](https://github.com/WordPress/performance/pull/1272))
+
+**Bug Fixes**
+
+* Fix Server-Timing compatibility with other plugins that do output buffering. ([1260](https://github.com/WordPress/performance/pull/1260))
+* Harden autoloaded-options site health test for incorrectly implemented external object cache plugins. ([1238](https://github.com/WordPress/performance/pull/1238))
 
 = 3.1.0 =
 
@@ -483,6 +517,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= 3.2.0 =
+
+This release introduces a new feature plugin called Image Prioritizer which optimizes the loading of images to improve LCP.
 
 = 3.0.0 =
 
